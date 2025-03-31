@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,75 +40,127 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-10">
+    <motion.header 
+      className="bg-white shadow-sm sticky top-0 z-10"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
+            <motion.div 
+              className="flex-shrink-0 flex items-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <div 
                 onClick={() => navigate("/")} 
                 className="flex items-center cursor-pointer"
               >
-                <span className="text-primary font-bold text-xl">Nexpeer</span>
-                <span className="text-secondary font-medium ml-1">Tech Blog</span>
+                <motion.span 
+                  className="text-primary font-bold text-xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  Nexpeer
+                </motion.span>
+                <motion.span 
+                  className="text-secondary font-medium ml-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  Tech Blog
+                </motion.span>
               </div>
-            </div>
+            </motion.div>
             <nav className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <button 
+              <motion.button 
                 onClick={() => navigate("/")} 
                 className={`${isActive("/") ? "border-primary text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
               >
                 Home
-              </button>
-              <button 
+              </motion.button>
+              <motion.button 
                 onClick={() => navigate("/topics")} 
                 className={`${isActive("/topics") ? "border-primary text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
               >
                 Topics
-              </button>
-              <button 
+              </motion.button>
+              <motion.button 
                 onClick={() => navigate("/about")} 
                 className={`${isActive("/about") ? "border-primary text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
               >
                 About
-              </button>
+              </motion.button>
             </nav>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            <div className="flex items-center space-x-4">
+            <motion.div 
+              className="flex items-center space-x-4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               {user ? (
                 <div className="flex items-center space-x-3">
                   {user.isAdmin && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => navigate("/admin")}
-                    >
-                      Dashboard
-                    </Button>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => navigate("/admin")}
+                      >
+                        Dashboard
+                      </Button>
+                    </motion.div>
                   )}
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={handleLogout}
-                    disabled={logoutMutation.isPending}
-                  >
-                    Sign out
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleLogout}
+                      disabled={logoutMutation.isPending}
+                    >
+                      Sign out
+                    </Button>
+                  </motion.div>
                 </div>
               ) : (
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  className="bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
-                  onClick={() => navigate("/auth")}
-                >
-                  Admin Login
-                </Button>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Admin Login
+                  </Button>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           </div>
-          <div className="flex items-center sm:hidden">
+          <motion.div 
+            className="flex items-center sm:hidden"
+            whileTap={{ scale: 0.9 }}
+          >
             <button 
               type="button" 
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
@@ -129,70 +182,100 @@ export default function Header() {
                 />
               </svg>
             </button>
-          </div>
+          </motion.div>
         </div>
       </div>
       
       {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
-            <button 
-              onClick={() => goTo("/")} 
-              className={`${isActive("/") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
-            >
-              Home
-            </button>
-            <button 
-              onClick={() => goTo("/topics")} 
-              className={`${isActive("/topics") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
-            >
-              Topics
-            </button>
-            <button 
-              onClick={() => goTo("/about")} 
-              className={`${isActive("/about") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
-            >
-              About
-            </button>
-            
-            {user ? (
-              <div className="px-3 py-3 flex flex-col space-y-2">
-                {user.isAdmin && (
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div 
+            className="sm:hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="pt-2 pb-3 space-y-1">
+              <motion.button 
+                onClick={() => goTo("/")} 
+                className={`${isActive("/") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Home
+              </motion.button>
+              <motion.button 
+                onClick={() => goTo("/topics")} 
+                className={`${isActive("/topics") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Topics
+              </motion.button>
+              <motion.button 
+                onClick={() => goTo("/about")} 
+                className={`${isActive("/about") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                About
+              </motion.button>
+              
+              {user ? (
+                <motion.div 
+                  className="px-3 py-3 flex flex-col space-y-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
+                >
+                  {user.isAdmin && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => goTo("/admin")}
+                    >
+                      Dashboard
+                    </Button>
+                  )}
                   <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => goTo("/admin")}
+                    variant="ghost" 
+                    className="w-full" 
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    disabled={logoutMutation.isPending}
                   >
-                    Dashboard
+                    Sign out
                   </Button>
-                )}
-                <Button 
-                  variant="ghost" 
-                  className="w-full" 
-                  onClick={() => {
-                    handleLogout();
-                    setIsMenuOpen(false);
-                  }}
-                  disabled={logoutMutation.isPending}
+                </motion.div>
+              ) : (
+                <motion.div 
+                  className="px-3 py-3"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
                 >
-                  Sign out
-                </Button>
-              </div>
-            ) : (
-              <div className="px-3 py-3">
-                <Button 
-                  variant="default" 
-                  className="w-full bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
-                  onClick={() => goTo("/auth")}
-                >
-                  Admin Login
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </header>
+                  <Button 
+                    variant="default" 
+                    className="w-full bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
+                    onClick={() => goTo("/auth")}
+                  >
+                    Admin Login
+                  </Button>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }
