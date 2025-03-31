@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import BlogLayout from "@/components/BlogLayout";
 import PopularPostsWidget from "@/components/PopularPostsWidget";
 import NewsletterWidget from "@/components/NewsletterWidget";
+import { motion } from "framer-motion";
 
 // Categories with icons and descriptions
 const CATEGORIES = [
@@ -68,19 +69,40 @@ export default function TopicsPage() {
         <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
           <main className="md:w-2/3">
             <div className="grid gap-6 md:grid-cols-2">
-              {CATEGORIES.map((category) => (
-                <Link key={category.slug} href={`/topics/${category.slug}`}>
-                  <a className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
-                    <div className="flex items-center mb-4">
-                      <span className="text-2xl mr-2">{category.icon}</span>
-                      <h2 className="text-xl font-bold text-text">{category.name}</h2>
-                    </div>
-                    <p className="text-secondary mb-4">{category.description}</p>
-                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.color}`}>
-                      Explore articles
-                    </div>
-                  </a>
-                </Link>
+              {CATEGORIES.map((category, index) => (
+                <motion.div
+                  key={category.slug}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ 
+                    y: -5,
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                  }}
+                  className="overflow-hidden rounded-lg bg-white shadow-md"
+                >
+                  <Link href={`/topics/${category.slug}`}>
+                    <a className="block h-full">
+                      <div className={`h-2 w-full ${category.color.split(' ')[0]}`}></div>
+                      <div className="p-6">
+                        <div className="flex items-center mb-4">
+                          <div className={`flex h-12 w-12 items-center justify-center rounded-full ${category.color} mr-4`}>
+                            <span className="text-2xl">{category.icon}</span>
+                          </div>
+                          <h2 className="text-xl font-bold text-text">{category.name}</h2>
+                        </div>
+                        <p className="text-secondary mb-6 line-clamp-3">{category.description}</p>
+                        <motion.div 
+                          className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${category.color} cursor-pointer`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Explore articles
+                        </motion.div>
+                      </div>
+                    </a>
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </main>
