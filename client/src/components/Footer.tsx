@@ -1,17 +1,21 @@
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [, navigate] = useLocation();
   
   return (
     <footer className="bg-white border-t border-gray-200 mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="md:flex md:justify-between">
           <div className="mb-8 md:mb-0">
-            <Link href="/" className="flex items-center">
+            <div 
+              onClick={() => navigate("/")} 
+              className="flex items-center cursor-pointer"
+            >
               <span className="text-primary font-bold text-xl">Nexpeer</span>
               <span className="text-secondary font-medium ml-1">Tech Blog</span>
-            </Link>
+            </div>
             <p className="mt-3 text-sm text-secondary max-w-md">
               Your source for in-depth tech articles, career guidance, and insights on the latest trends in technology.
             </p>
@@ -24,19 +28,28 @@ export default function Footer() {
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/" className="text-base text-secondary hover:text-primary">
+                  <button 
+                    onClick={() => navigate("/")} 
+                    className="text-base text-secondary hover:text-primary"
+                  >
                     Home
-                  </Link>
+                  </button>
                 </li>
                 <li>
-                  <Link href="/topics" className="text-base text-secondary hover:text-primary">
+                  <button 
+                    onClick={() => navigate("/topics")} 
+                    className="text-base text-secondary hover:text-primary"
+                  >
                     Topics
-                  </Link>
+                  </button>
                 </li>
                 <li>
-                  <Link href="/about" className="text-base text-secondary hover:text-primary">
+                  <button 
+                    onClick={() => navigate("/about")} 
+                    className="text-base text-secondary hover:text-primary"
+                  >
                     About
-                  </Link>
+                  </button>
                 </li>
               </ul>
             </div>

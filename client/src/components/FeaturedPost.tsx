@@ -1,13 +1,63 @@
 import { useQuery } from "@tanstack/react-query";
 import { Post } from "@shared/schema";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function FeaturedPost() {
-  const { data: post, isLoading, error } = useQuery<Post>({
+  const { data: featuredPost, isLoading: featuredLoading } = useQuery<Post>({
     queryKey: ["/api/featured-post"],
   });
+  
+  const { data: popularPosts, isLoading: popularLoading } = useQuery<Post[]>({
+    queryKey: ["/api/popular-posts"],
+  });
+  
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [, navigate] = useLocation();
+  
+  useEffect(() => {
+    // Combine featured post with popular posts for the carousel
+    // Remove duplicates if featured post is also in popular posts
+    if (featuredPost && popularPosts) {
+      const allPosts = [featuredPost];
+      popularPosts.forEach(post => {
+        if (post.id !== featuredPost.id) {
+          allPosts.push(post);
+        }
+      });
+      setPosts(allPosts.slice(0, 5)); // Limit to 5 posts for the carousel
+    }
+  }, [featuredPost, popularPosts]);
+  
+  const isLoading = featuredLoading || popularLoading;
+  
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev === posts.length - 1 ? 0 : prev + 1));
+  };
+  
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? posts.length - 1 : prev - 1));
+  };
+  
+  const goToPost = (slug: string) => {
+    navigate(`/blog/${slug}`);
+  };
+  
+  useEffect(() => {
+    // Auto-advance slides every 5 seconds
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    
+    return () => {
+      clearInterval(timer);
+    };
+  }, [currentSlide, posts.length]);
 
   if (isLoading) {
     return (
@@ -37,19 +87,21 @@ export default function FeaturedPost() {
     );
   }
 
-  if (error || !post) {
+  if (!posts || posts.length === 0) {
     return (
       <div className="mb-12 bg-white rounded-lg p-6 shadow-md text-center">
-        <p className="text-secondary">No featured post available at the moment.</p>
+        <p className="text-secondary">No posts available at the moment.</p>
       </div>
     );
   }
 
+  const post = posts[currentSlide];
+
   return (
-    <div className="mb-12">
+    <div className="mb-12 relative">
       <div className="relative rounded-lg overflow-hidden bg-white shadow-md">
         <div className="lg:flex">
-          <div className="lg:w-1/2">
+          <div className="lg:w-1/2 relative">
             {post.featuredImage ? (
               <img 
                 className="h-64 w-full object-cover lg:h-full" 
@@ -63,13 +115,17 @@ export default function FeaturedPost() {
             )}
           </div>
           <div className="lg:w-1/2 p-6 lg:p-8">
-            <div className="uppercase tracking-wide text-xs font-semibold text-accent">Featured</div>
-            <Link href={`/blog/${post.slug}`} className="block mt-2">
-              <p className="text-2xl font-bold text-text hover:text-primary transition-colors duration-200">{post.title}</p>
+            <div className="uppercase tracking-wide text-xs font-semibold text-accent">
+              {currentSlide === 0 ? "Featured" : `Popular Post ${currentSlide}`}
+            </div>
+            <div className="block mt-2 cursor-pointer" onClick={() => goToPost(post.slug)}>
+              <p className="text-2xl font-bold text-text hover:text-primary transition-colors duration-200">
+                {post.title}
+              </p>
               <p className="mt-3 text-secondary line-clamp-3">
                 {post.excerpt}
               </p>
-            </Link>
+            </div>
             <div className="mt-6 flex items-center">
               <div className="flex-shrink-0">
                 <img 
@@ -91,6 +147,37 @@ export default function FeaturedPost() {
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Navigation arrows */}
+      <Button 
+        variant="outline" 
+        size="icon" 
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 rounded-full bg-white shadow-md hover:bg-gray-100 z-10"
+        onClick={prevSlide}
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </Button>
+      <Button 
+        variant="outline" 
+        size="icon" 
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full bg-white shadow-md hover:bg-gray-100 z-10"
+        onClick={nextSlide}
+      >
+        <ChevronRight className="h-6 w-6" />
+      </Button>
+      
+      {/* Slide indicators */}
+      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+        {posts.map((_, index) => (
+          <button
+            key={index}
+            className={`h-2 w-2 rounded-full ${
+              currentSlide === index ? "bg-primary" : "bg-gray-300"
+            }`}
+            onClick={() => setCurrentSlide(index)}
+          />
+        ))}
       </div>
     </div>
   );

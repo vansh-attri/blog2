@@ -1,24 +1,14 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -43,36 +33,44 @@ export default function Header() {
     return false;
   };
 
+  const goTo = (path: string) => {
+    navigate(path);
+    setIsMenuOpen(false);
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="flex items-center">
+              <div 
+                onClick={() => navigate("/")} 
+                className="flex items-center cursor-pointer"
+              >
                 <span className="text-primary font-bold text-xl">Nexpeer</span>
                 <span className="text-secondary font-medium ml-1">Tech Blog</span>
-              </Link>
+              </div>
             </div>
             <nav className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link 
-                href="/" 
+              <button 
+                onClick={() => navigate("/")} 
                 className={`${isActive("/") ? "border-primary text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Home
-              </Link>
-              <Link 
-                href="/topics" 
+              </button>
+              <button 
+                onClick={() => navigate("/topics")} 
                 className={`${isActive("/topics") ? "border-primary text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Topics
-              </Link>
-              <Link 
-                href="/about" 
+              </button>
+              <button 
+                onClick={() => navigate("/about")} 
                 className={`${isActive("/about") ? "border-primary text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 About
-              </Link>
+              </button>
             </nav>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
@@ -80,11 +78,13 @@ export default function Header() {
               {user ? (
                 <div className="flex items-center space-x-3">
                   {user.isAdmin && (
-                    <Link href="/admin">
-                      <Button variant="outline" size="sm">
-                        Dashboard
-                      </Button>
-                    </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigate("/admin")}
+                    >
+                      Dashboard
+                    </Button>
                   )}
                   <Button 
                     variant="ghost" 
@@ -96,15 +96,14 @@ export default function Header() {
                   </Button>
                 </div>
               ) : (
-                <Link href="/auth">
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    className="bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
-                  >
-                    Admin Login
-                  </Button>
-                </Link>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
+                  onClick={() => navigate("/auth")}
+                >
+                  Admin Login
+                </Button>
               )}
             </div>
           </div>
@@ -138,38 +137,35 @@ export default function Header() {
       {isMenuOpen && (
         <div className="sm:hidden">
           <div className="pt-2 pb-3 space-y-1">
-            <Link 
-              href="/" 
-              className={`${isActive("/") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block pl-3 pr-4 py-2 text-base font-medium`}
-              onClick={() => setIsMenuOpen(false)}
+            <button 
+              onClick={() => goTo("/")} 
+              className={`${isActive("/") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
             >
               Home
-            </Link>
-            <Link 
-              href="/topics" 
-              className={`${isActive("/topics") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block pl-3 pr-4 py-2 text-base font-medium`}
-              onClick={() => setIsMenuOpen(false)}
+            </button>
+            <button 
+              onClick={() => goTo("/topics")} 
+              className={`${isActive("/topics") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
             >
               Topics
-            </Link>
-            <Link 
-              href="/about" 
-              className={`${isActive("/about") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block pl-3 pr-4 py-2 text-base font-medium`}
-              onClick={() => setIsMenuOpen(false)}
+            </button>
+            <button 
+              onClick={() => goTo("/about")} 
+              className={`${isActive("/about") ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100"} block w-full text-left pl-3 pr-4 py-2 text-base font-medium`}
             >
               About
-            </Link>
-            
-
+            </button>
             
             {user ? (
               <div className="px-3 py-3 flex flex-col space-y-2">
                 {user.isAdmin && (
-                  <Link href="/admin" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="outline" className="w-full">
-                      Dashboard
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => goTo("/admin")}
+                  >
+                    Dashboard
+                  </Button>
                 )}
                 <Button 
                   variant="ghost" 
@@ -185,14 +181,13 @@ export default function Header() {
               </div>
             ) : (
               <div className="px-3 py-3">
-                <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button 
-                    variant="default" 
-                    className="w-full bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
-                  >
-                    Admin Login
-                  </Button>
-                </Link>
+                <Button 
+                  variant="default" 
+                  className="w-full bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
+                  onClick={() => goTo("/auth")}
+                >
+                  Admin Login
+                </Button>
               </div>
             )}
           </div>
