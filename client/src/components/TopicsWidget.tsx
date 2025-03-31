@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 
 const POPULAR_TOPICS = [
   { name: "Web Development", slug: "web-development" },
@@ -11,19 +11,24 @@ const POPULAR_TOPICS = [
 ];
 
 export default function TopicsWidget() {
+  const [, navigate] = useLocation();
+
+  const goToTopic = (slug: string) => {
+    navigate(`/topics/${slug}`);
+  };
+
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
       <h3 className="text-lg font-bold mb-4 text-text">Popular Topics</h3>
       <div className="flex flex-wrap gap-2">
         {POPULAR_TOPICS.map((topic) => (
-          <Link 
+          <button
             key={topic.slug} 
-            href={`/topics/${topic.slug}`}
+            onClick={() => goToTopic(topic.slug)}
+            className="px-3 py-1 bg-gray-100 rounded-full text-sm text-secondary hover:bg-primary hover:text-white transition-colors duration-200"
           >
-            <a className="px-3 py-1 bg-gray-100 rounded-full text-sm text-secondary hover:bg-primary hover:text-white transition-colors duration-200">
-              {topic.name}
-            </a>
-          </Link>
+            {topic.name}
+          </button>
         ))}
       </div>
     </div>

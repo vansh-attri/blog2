@@ -77,25 +77,6 @@ export default function Header() {
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             <div className="flex items-center space-x-4">
-              <form onSubmit={handleSearch} className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search articles..."
-                  className="w-64 pl-4 pr-10 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button 
-                  type="submit" 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2"
-                >
-                  <Search className="h-5 w-5 text-gray-400" />
-                  <span className="sr-only">Search</span>
-                </Button>
-              </form>
-              
               {user ? (
                 <div className="flex items-center space-x-3">
                   {user.isAdmin && (
@@ -117,11 +98,11 @@ export default function Header() {
               ) : (
                 <Link href="/auth">
                   <Button 
-                    variant="ghost" 
+                    variant="default" 
                     size="sm" 
-                    className="text-primary hover:bg-primary hover:text-white transition-colors duration-200"
+                    className="bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
                   >
-                    Sign in
+                    Admin Login
                   </Button>
                 </Link>
               )}
@@ -179,27 +160,7 @@ export default function Header() {
               About
             </Link>
             
-            <div className="px-3 py-3">
-              <form onSubmit={handleSearch} className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search articles..."
-                  className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button 
-                  type="submit" 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Search className="h-5 w-5 text-gray-400" />
-                  <span className="sr-only">Search</span>
-                </Button>
-              </form>
-            </div>
+
             
             {user ? (
               <div className="px-3 py-3 flex flex-col space-y-2">
@@ -226,10 +187,10 @@ export default function Header() {
               <div className="px-3 py-3">
                 <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
                   <Button 
-                    variant="outline" 
-                    className="w-full text-primary hover:bg-primary hover:text-white transition-colors duration-200"
+                    variant="default" 
+                    className="w-full bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
                   >
-                    Sign in
+                    Admin Login
                   </Button>
                 </Link>
               </div>

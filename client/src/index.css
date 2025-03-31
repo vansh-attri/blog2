@@ -11,3 +11,21 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .text-text {
+    @apply text-gray-800;
+  }
+  
+  .text-secondary {
+    @apply text-gray-600;
+  }
+  
+  .text-primary {
+    @apply text-blue-600;
+  }
+  
+  .article-content {
+    @apply text-gray-800;
+  }
+}
