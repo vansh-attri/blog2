@@ -1,8 +1,7 @@
 import BlogLayout from "@/components/BlogLayout";
-import FeaturedPost from "@/components/FeaturedPost"; // Will be updated to FeaturedPostsCarousel
+import FeaturedPost from "@/components/FeaturedPost";
 import BlogPostsList from "@/components/BlogPostsList";
 import TopicsWidget from "@/components/TopicsWidget";
-import PopularPostsWidget from "@/components/PopularPostsWidget";
 
 export default function HomePage() {
   return (
@@ -17,7 +16,6 @@ export default function HomePage() {
           
           <aside className="md:w-1/3 space-y-8">
             <TopicsWidget />
-            <PopularPostsWidget />
           </aside>
         </div>
       </div>

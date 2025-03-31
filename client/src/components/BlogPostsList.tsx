@@ -22,7 +22,6 @@ interface PostsResponse {
 
 export default function BlogPostsList({ category }: BlogPostsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState<"newest" | "popular">("newest");
 
   const queryUrl = category 
     ? `/api/posts?category=${encodeURIComponent(category)}&page=${currentPage}`
@@ -40,12 +39,8 @@ export default function BlogPostsList({ category }: BlogPostsListProps) {
   if (isLoading) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <Skeleton className="h-8 w-40" />
-          <div className="flex space-x-2">
-            <Skeleton className="h-8 w-20" />
-            <Skeleton className="h-8 w-20" />
-          </div>
         </div>
 
         <div className="space-y-6">
@@ -93,24 +88,8 @@ export default function BlogPostsList({ category }: BlogPostsListProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <h2 className="text-2xl font-bold text-text">Latest Articles{category ? ` in ${category}` : ''}</h2>
-        <div className="flex space-x-2">
-          <Button
-            onClick={() => setSortBy("newest")}
-            variant={sortBy === "newest" ? "default" : "outline"}
-            size="sm"
-          >
-            Newest
-          </Button>
-          <Button
-            onClick={() => setSortBy("popular")}
-            variant={sortBy === "popular" ? "default" : "outline"}
-            size="sm"
-          >
-            Popular
-          </Button>
-        </div>
       </div>
 
       <div className="space-y-6">
