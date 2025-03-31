@@ -362,11 +362,10 @@ export default function AdminPostEditor() {
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
-                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>

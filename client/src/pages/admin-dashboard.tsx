@@ -29,15 +29,11 @@ export default function AdminDashboard() {
       const draftRes = await fetch('/api/admin/posts?status=draft', { credentials: 'include' });
       const draftData = await draftRes.json();
       
-      // Fetch subscribers
-      const subscribersRes = await fetch('/api/admin/subscribers', { credentials: 'include' });
-      const subscribersData = await subscribersRes.json();
-      
       return {
         posts: postsData.pagination.total,
         publishedPosts: publishedData.pagination.total,
         draftPosts: draftData.pagination.total,
-        subscribers: subscribersData.length,
+        subscribers: 0, // Keeping the field for type compatibility but not fetching data
       };
     }
   });
@@ -87,19 +83,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Subscribers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-7 w-12" />
-            ) : (
-              <div className="text-2xl font-bold">{stats?.subscribers || 0}</div>
-            )}
-          </CardContent>
-        </Card>
+
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -120,12 +104,7 @@ export default function AdminDashboard() {
                 Manage All Posts
               </Button>
             </Link>
-            <Link href="/admin/subscribers">
-              <Button variant="outline" className="w-full sm:w-auto">
-                <Users className="mr-2 h-4 w-4" />
-                View Subscribers
-              </Button>
-            </Link>
+
           </CardContent>
         </Card>
 

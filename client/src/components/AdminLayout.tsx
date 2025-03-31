@@ -98,7 +98,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
           <div className="flex-1 flex flex-col pt-5 overflow-y-auto">
             <nav className="flex-1 px-2 space-y-1">
               <Link href="/admin">
-                <a className={`${isActive("/admin") && !isActive("/admin/posts") && !isActive("/admin/subscribers") ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-50"} group flex items-center px-2 py-2 text-sm font-medium rounded-md`}>
+                <a className={`${isActive("/admin") && !isActive("/admin/posts") ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-50"} group flex items-center px-2 py-2 text-sm font-medium rounded-md`}>
                   <Home className="h-5 w-5 mr-3" />
                   Dashboard
                 </a>
@@ -109,12 +109,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                   Posts
                 </a>
               </Link>
-              <Link href="/admin/subscribers">
-                <a className={`${isActive("/admin/subscribers") ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-50"} group flex items-center px-2 py-2 text-sm font-medium rounded-md`}>
-                  <Users className="h-5 w-5 mr-3" />
-                  Subscribers
-                </a>
-              </Link>
+
             </nav>
             <div className="p-4 border-t border-gray-200">
               <div className="flex items-center">
@@ -138,7 +133,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
               <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <nav className="mt-5 px-2 space-y-1">
                   <Link href="/admin">
-                    <a className={`${isActive("/admin") && !isActive("/admin/posts") && !isActive("/admin/subscribers") ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-50"} group flex items-center px-2 py-2 text-base font-medium rounded-md`} onClick={() => setSidebarOpen(false)}>
+                    <a className={`${isActive("/admin") && !isActive("/admin/posts") ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-50"} group flex items-center px-2 py-2 text-base font-medium rounded-md`} onClick={() => setSidebarOpen(false)}>
                       <Home className="h-5 w-5 mr-3" />
                       Dashboard
                     </a>
@@ -149,12 +144,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                       Posts
                     </a>
                   </Link>
-                  <Link href="/admin/subscribers">
-                    <a className={`${isActive("/admin/subscribers") ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-50"} group flex items-center px-2 py-2 text-base font-medium rounded-md`} onClick={() => setSidebarOpen(false)}>
-                      <Users className="h-5 w-5 mr-3" />
-                      Subscribers
-                    </a>
-                  </Link>
+
                 </nav>
               </div>
               <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
