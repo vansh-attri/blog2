@@ -40,7 +40,7 @@ export interface IStorage {
   getAllSubscribers(): Promise<Subscriber[]>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Express session store
 }
 
 export class MemStorage implements IStorage {
@@ -50,7 +50,7 @@ export class MemStorage implements IStorage {
   private userIdCounter: number;
   private postIdCounter: number;
   private subscriberIdCounter: number;
-  public sessionStore: session.SessionStore;
+  public sessionStore: any; // Express session store
 
   constructor() {
     this.users = new Map();
@@ -417,4 +417,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { DatabaseStorage } from "./storage.database";
+
+// Switch to database storage
+export const storage = new DatabaseStorage();
