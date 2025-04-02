@@ -258,8 +258,8 @@ export default function AdminPostEditor() {
                     <FormLabel>Category</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                      value={field.value}
+                      defaultValue={field.value || undefined}
+                      value={field.value || undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -268,7 +268,7 @@ export default function AdminPostEditor() {
                       </FormControl>
                       <SelectContent>
                         {CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
+                          <SelectItem key={category} value={category || 'unknown'}>
                             {category}
                           </SelectItem>
                         ))}
@@ -361,11 +361,12 @@ export default function AdminPostEditor() {
                       <FormLabel>Status</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
-                        defaultValue={field.value}
+                        defaultValue={field.value || "draft"}
+                        value={field.value || "draft"}
                       >
                         <FormControl>
                           <SelectTrigger className="w-[200px]">
-                            <SelectValue />
+                            <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
