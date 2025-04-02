@@ -1,7 +1,7 @@
 import { Post, InsertPost, UpdatePost, User, InsertUser, UpdateUser, Subscriber, InsertSubscriber } from "@shared/schema";
 import { createId } from "@paralleldrive/cuid2";
-import createMemoryStore from "memorystore";
 import session from "express-session";
+import { ObjectId } from "mongodb";
 
 // Convert string to slug
 function slugify(text: string): string {
@@ -15,32 +15,32 @@ function slugify(text: string): string {
 
 export interface IStorage {
   // User operations
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: number | string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  updateUser(id: number, data: UpdateUser): Promise<User | undefined>;
+  updateUser(id: number | string, data: UpdateUser): Promise<User | undefined>;
   
   // Post operations
-  getPost(id: number): Promise<Post | undefined>;
+  getPost(id: number | string): Promise<Post | undefined>;
   getPostBySlug(slug: string): Promise<Post | undefined>;
   getAllPosts(options?: { status?: string, limit?: number, offset?: number }): Promise<Post[]>;
   getPostsByCategory(category: string, options?: { status?: string, limit?: number, offset?: number }): Promise<Post[]>;
   createPost(post: InsertPost): Promise<Post>;
-  updatePost(id: number, post: UpdatePost): Promise<Post | undefined>;
-  deletePost(id: number): Promise<boolean>;
+  updatePost(id: number | string, post: UpdatePost): Promise<Post | undefined>;
+  deletePost(id: number | string): Promise<boolean>;
   searchPosts(query: string, options?: { status?: string, limit?: number, offset?: number }): Promise<Post[]>;
   getFeaturedPost(): Promise<Post | undefined>;
   getPopularPosts(limit?: number): Promise<Post[]>;
   getPostCount(options?: { status?: string, category?: string }): Promise<number>;
   
   // Subscriber operations
-  getSubscriber(id: number): Promise<Subscriber | undefined>;
+  getSubscriber(id: number | string): Promise<Subscriber | undefined>;
   getSubscriberByEmail(email: string): Promise<Subscriber | undefined>;
   createSubscriber(subscriber: InsertSubscriber): Promise<Subscriber>;
   getAllSubscribers(): Promise<Subscriber[]>;
   
   // Session store
-  sessionStore: any; // Express session store
+  sessionStore: session.Store; // Express session store
 }
 
 export class MemStorage implements IStorage {
@@ -420,4 +420,12 @@ export class MemStorage implements IStorage {
 import { DatabaseStorage } from "./storage.database";
 
 // Switch to database storage
-export const storage = new DatabaseStorage();
+// Import the MongoStorage class
+import { MongoStorage } from './storage.mongo';
+import { connectToMongoDB } from './mongo';
+
+// Connect to MongoDB when the server starts (this is now handled in index.ts)
+// connectToMongoDB();
+
+// Export MongoStorage implementation
+export const storage = new MongoStorage();

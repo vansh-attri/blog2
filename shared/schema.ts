@@ -1,95 +1,68 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { ObjectId } from "mongodb";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  displayName: text("display_name"),
-  profileImage: text("profile_image"),
-  isAdmin: boolean("is_admin").default(false).notNull(),
+// Define Zod schemas for MongoDB models
+export const userSchema = z.object({
+  _id: z.any().optional(), // MongoDB ObjectId
+  username: z.string(),
+  password: z.string(),
+  displayName: z.string().optional(),
+  profileImage: z.string().optional(),
+  isAdmin: z.boolean().default(false),
 });
 
-export const posts = pgTable("posts", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  slug: text("slug").notNull().unique(),
-  excerpt: text("excerpt").notNull(),
-  content: text("content").notNull(),
-  featuredImage: text("featured_image"),
-  authorId: integer("author_id").references(() => users.id),
-  category: text("category").notNull(),
-  publishedAt: timestamp("published_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  status: text("status").default("draft").notNull(),
-  readTime: integer("read_time"),
+export const postSchema = z.object({
+  _id: z.any().optional(), // MongoDB ObjectId
+  title: z.string(),
+  slug: z.string(),
+  excerpt: z.string(),
+  content: z.string(),
+  featuredImage: z.string().optional(),
+  authorId: z.any().optional(), // Reference to user _id
+  category: z.string(),
+  publishedAt: z.date().optional(),
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
+  status: z.string().default("draft"),
+  readTime: z.number().optional(),
 });
 
-export const subscribers = pgTable("subscribers", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+export const subscriberSchema = z.object({
+  _id: z.any().optional(), // MongoDB ObjectId
+  email: z.string().email(),
+  createdAt: z.date().default(() => new Date()),
 });
 
 // User schemas
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  displayName: true,
-  profileImage: true,
-  isAdmin: true,
-});
+export const insertUserSchema = userSchema.omit({ _id: true });
 
-export const updateUserSchema = createInsertSchema(users).pick({
+export const updateUserSchema = userSchema.pick({
   displayName: true,
   profileImage: true,
 }).partial();
 
 // Post schemas
-export const insertPostSchema = createInsertSchema(posts).pick({
-  title: true,
-  slug: true,
-  excerpt: true,
-  content: true,
-  featuredImage: true,
-  authorId: true,
-  category: true,
-  status: true,
-  readTime: true,
-}).extend({
+export const insertPostSchema = postSchema.omit({ _id: true, createdAt: true, updatedAt: true }).extend({
   publishNow: z.boolean().default(false),
 });
 
-export const updatePostSchema = createInsertSchema(posts).pick({
-  title: true,
-  slug: true,
-  excerpt: true,
-  content: true,
-  featuredImage: true,
-  category: true,
-  status: true,
-  readTime: true,
-}).partial().extend({
+export const updatePostSchema = postSchema.omit({ _id: true, createdAt: true }).partial().extend({
   publishNow: z.boolean().default(false),
 });
 
 // Subscriber schema
-export const insertSubscriberSchema = createInsertSchema(subscribers).pick({
-  email: true,
-});
+export const insertSubscriberSchema = subscriberSchema.omit({ _id: true, createdAt: true });
 
 // Types
-export type User = typeof users.$inferSelect;
+export type User = z.infer<typeof userSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;
 
-export type Post = typeof posts.$inferSelect;
+export type Post = z.infer<typeof postSchema>;
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type UpdatePost = z.infer<typeof updatePostSchema>;
 
-export type Subscriber = typeof subscribers.$inferSelect;
+export type Subscriber = z.infer<typeof subscriberSchema>;
 export type InsertSubscriber = z.infer<typeof insertSubscriberSchema>;
 
 // Search schema

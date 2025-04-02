@@ -1,6 +1,21 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { connectToMongoDB } from "./mongo";
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
+
+// Set MongoDB connection string using the PostgreSQL connection string
+// This makes migration easier as we can reuse the existing DATABASE_URL
+process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nexpeer-blog';
+
+// Initialize MongoDB connection
+connectToMongoDB().catch(err => {
+  console.error('Failed to connect to MongoDB', err);
+  process.exit(1);
+});
 
 const app = express();
 app.use(express.json());
