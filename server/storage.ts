@@ -2,6 +2,7 @@ import { Post, InsertPost, UpdatePost, User, InsertUser, UpdateUser, Subscriber,
 import { createId } from "@paralleldrive/cuid2";
 import session from "express-session";
 import { ObjectId } from "mongodb";
+import memorystore from "memorystore";
 
 // Convert string to slug
 function slugify(text: string): string {
@@ -61,7 +62,7 @@ export class MemStorage implements IStorage {
     this.subscriberIdCounter = 1;
     
     // Initialize session store
-    const MemoryStore = createMemoryStore(session);
+    const MemoryStore = memorystore(session);
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     });
@@ -419,13 +420,49 @@ export class MemStorage implements IStorage {
 
 import { DatabaseStorage } from "./storage.database";
 
-// Switch to database storage
-// Import the MongoStorage class
+// Import MongoDB and memory storage
 import { MongoStorage } from './storage.mongo';
 import { connectToMongoDB } from './mongo';
 
-// Connect to MongoDB when the server starts (this is now handled in index.ts)
-// connectToMongoDB();
+// Function to create appropriate storage based on environment
+function createStorage(): IStorage {
+  try {
+    // Initialize the global variable if it doesn't exist
+    if (typeof global.useMemoryStorage === 'undefined') {
+      global.useMemoryStorage = false;
+    }
+    
+    // Check if the global flag to use memory storage has been set
+    // This happens if MongoDB connection fails
+    if (global.useMemoryStorage) {
+      console.log('Using memory storage (MongoDB connection failed or forced)');
+      return new MemStorage();
+    } else {
+      // First check if MongoDB URI is valid
+      const mongodbUri = process.env.MONGODB_URI;
+      if (!mongodbUri || 
+          (!mongodbUri.startsWith('mongodb://') && 
+           !mongodbUri.startsWith('mongodb+srv://'))) {
+        console.log('Invalid MongoDB URI, falling back to memory storage');
+        global.useMemoryStorage = true;
+        return new MemStorage();
+      }
+      
+      console.log('Using MongoDB storage');
+      try {
+        return new MongoStorage();
+      } catch (storageError) {
+        console.error('Error creating MongoDB storage, falling back to memory storage', storageError);
+        global.useMemoryStorage = true;
+        return new MemStorage();
+      }
+    }
+  } catch (error) {
+    console.error('Error creating storage, falling back to memory storage', error);
+    global.useMemoryStorage = true;
+    return new MemStorage();
+  }
+}
 
-// Export MongoStorage implementation
-export const storage = new MongoStorage();
+// Export storage implementation with fallback
+export const storage = createStorage();

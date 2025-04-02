@@ -1,10 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
 import { Link } from "wouter";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, Users, TrendingUp } from "lucide-react";
+import { 
+  PlusCircle, 
+  FileText, 
+  Users, 
+  TrendingUp, 
+  Database, 
+  AlertCircle, 
+  Info,
+  HardDrive,
+  Server
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DashboardStats {
   posts: number;
@@ -40,7 +58,9 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout title="Dashboard">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <DatabaseStatus />
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
@@ -82,8 +102,6 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
-        
-
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -118,6 +136,144 @@ export default function AdminDashboard() {
         </Card>
       </div>
     </AdminLayout>
+  );
+}
+
+// Database status component to show the current storage mode and connection status
+function DatabaseStatus() {
+  // Interface for the system status response
+  interface SystemStatus {
+    database: {
+      type: 'memory' | 'mongodb';
+      connected: boolean;
+      connectionState: number;
+      readyStates: {
+        [key: string]: string;
+      }
+    };
+    server: {
+      environment: string;
+      uptime: string;
+    };
+    memory: {
+      usage: string;
+      total: string;
+    };
+  }
+
+  const { data, isLoading, error, refetch } = useQuery<SystemStatus>({
+    queryKey: ['/api/admin/system/status'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/system/status', { credentials: 'include' });
+      
+      if (!res.ok) {
+        throw new Error('Failed to fetch system status');
+      }
+      
+      return res.json();
+    },
+    // Refresh every 30 seconds to monitor connection status
+    refetchInterval: 30000,
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex items-center space-x-2">
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>System Status Error</AlertTitle>
+        <AlertDescription>
+          Unable to fetch system status information. The server may be experiencing issues.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  // Determine the status styling based on the database type and connection state
+  const isMemoryMode = data.database.type === 'memory';
+  const isConnected = data.database.connected;
+  
+  const statusColor = isMemoryMode 
+    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' 
+    : (isConnected ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200');
+  
+  const statusIcon = isMemoryMode 
+    ? <HardDrive className="h-4 w-4" /> 
+    : (isConnected ? <Database className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />);
+  
+  const statusText = isMemoryMode 
+    ? 'Using Memory Storage' 
+    : (isConnected ? 'MongoDB Connected' : 'MongoDB Disconnected');
+  
+  const readyStateDesc = data.database.readyStates[data.database.connectionState] || 'Unknown';
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant="outline" className={`px-3 py-1 flex items-center gap-1 ${statusColor}`}>
+                    {statusIcon}
+                    {statusText}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-md">
+                  <div className="space-y-2 p-1">
+                    <p className="font-semibold">Database Information</p>
+                    <div className="text-xs space-y-1">
+                      <p><span className="font-medium">Type:</span> {data.database.type}</p>
+                      <p><span className="font-medium">Connected:</span> {data.database.connected ? 'Yes' : 'No'}</p>
+                      <p><span className="font-medium">State:</span> {readyStateDesc} ({data.database.connectionState})</p>
+                      {isMemoryMode && (
+                        <p className="italic text-muted-foreground mt-1">
+                          Memory storage does not persist data between server restarts.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Server className="h-4 w-4 mr-1" />
+              <span>Server uptime: {data.server.uptime}</span>
+            </div>
+          </div>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => refetch()}
+            className="h-8 w-8 p-0"
+          >
+            <span className="sr-only">Refresh Status</span>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

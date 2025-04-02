@@ -1,11 +1,43 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { connection } from "./mongo";
 import { insertPostSchema, updatePostSchema, searchSchema, insertSubscriberSchema } from "@shared/schema";
 import { z } from "zod";
 
+// Middleware to check MongoDB connection for API routes
+function checkDatabaseConnectionMiddleware(req: Request, res: Response, next: NextFunction) {
+  // Skip for authentication routes to always allow login/logout with in-memory fallback
+  if (req.path.startsWith('/api/login') || req.path.startsWith('/api/logout') || req.path.startsWith('/api/user')) {
+    return next();
+  }
+  
+  // Only check on API routes
+  if (req.path.startsWith('/api/')) {
+    // Check if we're in memory mode
+    if (global.useMemoryStorage) {
+      // If already in memory mode, add context to response
+      res.locals.storageType = 'memory';
+      return next();
+    }
+    
+    // Check MongoDB connection
+    if (connection.readyState !== 1) { // Not connected
+      console.warn(`Database disconnected (state: ${connection.readyState}), switching to memory storage`);
+      global.useMemoryStorage = true;
+      res.locals.storageType = 'memory';
+    } else {
+      res.locals.storageType = 'mongodb';
+    }
+  }
+  
+  next();
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add database health check middleware
+  app.use(checkDatabaseConnectionMiddleware);
   // Set up authentication
   const { isAdmin } = setupAuth(app);
   
@@ -276,6 +308,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching subscribers:", error);
       res.status(500).json({ message: "Failed to fetch subscribers" });
+    }
+  });
+  
+  // System status endpoint for admins - check database health
+  app.get("/api/admin/system/status", isAdmin, (req, res) => {
+    try {
+      const isMongoConnected = connection.readyState === 1;
+      
+      const status = {
+        database: {
+          type: global.useMemoryStorage ? 'memory' : 'mongodb',
+          connected: global.useMemoryStorage ? true : isMongoConnected,
+          connectionState: global.useMemoryStorage ? 1 : connection.readyState,
+          readyStates: {
+            0: 'disconnected',
+            1: 'connected',
+            2: 'connecting',
+            3: 'disconnecting',
+            99: 'uninitialized'
+          }
+        },
+        server: {
+          environment: process.env.NODE_ENV || 'development',
+          uptime: Math.floor(process.uptime()) + ' seconds'
+        },
+        memory: {
+          usage: Math.round(process.memoryUsage().heapUsed / 1024 / 1024 * 100) / 100 + ' MB',
+          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024 * 100) / 100 + ' MB'
+        }
+      };
+      
+      res.json(status);
+    } catch (error) {
+      console.error("Error fetching system status:", error);
+      res.status(500).json({ message: "Failed to fetch system status" });
     }
   });
 

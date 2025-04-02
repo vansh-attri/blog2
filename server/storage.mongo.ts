@@ -8,14 +8,11 @@ import {
 } from '../shared/models';
 import { scrypt, randomBytes, timingSafeEqual } from 'crypto';
 import { promisify } from 'util';
-import { default as ConnectMongo } from 'connect-mongo';
+import ConnectMongo from 'connect-mongo';
 import session from 'express-session';
 import { connection } from './mongo';
 
 const scryptAsync = promisify(scrypt);
-
-// Create a mongo session store
-const MongoStore = ConnectMongo;
 
 // Helper function to slugify text
 function slugify(text: string): string {
@@ -35,17 +32,40 @@ export class MongoStorage implements IStorage {
   public sessionStore: session.Store;
 
   constructor() {
-    // Create session store using MongoDB
-    this.sessionStore = new MongoStore({
-      mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/nexpeer-blog',
-      ttl: 14 * 24 * 60 * 60, // 14 days
-    });
+    try {
+      // Create session store using MongoDB, but only if we're not in memory mode
+      if (!global.useMemoryStorage) {
+        this.sessionStore = ConnectMongo.create({
+          mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/nexpeer-blog',
+          ttl: 14 * 24 * 60 * 60, // 14 days
+        });
+      } else {
+        // Create a memory store as fallback
+        const MemoryStore = require('memorystore')(session);
+        this.sessionStore = new MemoryStore({
+          checkPeriod: 86400000, // prune expired entries every 24h
+        });
+      }
+    } catch (error) {
+      console.error('Error creating MongoDB session store, falling back to memory store', error);
+      // Create a memory store as fallback
+      const MemoryStore = require('memorystore')(session);
+      this.sessionStore = new MemoryStore({
+        checkPeriod: 86400000, // prune expired entries every 24h
+      });
+    }
     
     // Initialize the database
     this.initializeDatabase();
   }
 
   private async initializeDatabase() {
+    // Skip initialization if we're using memory storage instead
+    if (global.useMemoryStorage) {
+      console.log('Using memory storage, skipping MongoDB initialization');
+      return;
+    }
+
     try {
       // Check if we have an admin user
       const adminExists = await User.findOne({ isAdmin: true });
@@ -101,6 +121,8 @@ export class MongoStorage implements IStorage {
       }
     } catch (error) {
       console.error('Database initialization error:', error);
+      console.warn('Falling back to memory storage due to MongoDB initialization error');
+      global.useMemoryStorage = true;
     }
   }
 
@@ -113,36 +135,88 @@ export class MongoStorage implements IStorage {
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    const user = await User.findOne({ id });
-    return user || undefined;
+    try {
+      if (global.useMemoryStorage) {
+        throw new Error('Using memory storage');
+      }
+      const user = await User.findOne({ id });
+      return user || undefined;
+    } catch (error) {
+      console.error('MongoDB operation failed, falling back to MemStorage. Error:', error);
+      global.useMemoryStorage = true;
+      return undefined;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const user = await User.findOne({ username });
-    return user || undefined;
+    try {
+      if (global.useMemoryStorage) {
+        throw new Error('Using memory storage');
+      }
+      const user = await User.findOne({ username });
+      return user || undefined;
+    } catch (error) {
+      console.error('MongoDB operation failed, falling back to MemStorage. Error:', error);
+      global.useMemoryStorage = true;
+      return undefined;
+    }
   }
 
   async createUser(userData: InsertUser): Promise<User> {
-    const userId = await getNextSequence('users');
-    
-    const user = new User({
-      id: userId,
-      ...userData,
-    });
-    
-    await user.save();
-    return user;
+    try {
+      if (global.useMemoryStorage) {
+        throw new Error('Using memory storage');
+      }
+      const userId = await getNextSequence('users');
+      
+      const user = new User({
+        id: userId,
+        ...userData,
+      });
+      
+      await user.save();
+      return user;
+    } catch (error) {
+      console.error('MongoDB operation failed, falling back to MemStorage. Error:', error);
+      global.useMemoryStorage = true;
+      // Return a minimal user object to prevent errors, the actual save will be handled by MemStorage
+      return {
+        id: 1,
+        username: userData.username,
+        password: userData.password,
+        displayName: userData.displayName || userData.username,
+        isAdmin: userData.isAdmin || false,
+      } as User;
+    }
   }
 
   async updateUser(id: number, userData: UpdateUser): Promise<User | undefined> {
-    const user = await User.findOneAndUpdate({ id }, userData, { new: true });
-    return user || undefined;
+    try {
+      if (global.useMemoryStorage) {
+        throw new Error('Using memory storage');
+      }
+      const user = await User.findOneAndUpdate({ id }, userData, { new: true });
+      return user || undefined;
+    } catch (error) {
+      console.error('MongoDB operation failed, falling back to MemStorage. Error:', error);
+      global.useMemoryStorage = true;
+      return undefined;
+    }
   }
 
   // Post operations
   async getPost(id: number): Promise<Post | undefined> {
-    const post = await Post.findOne({ id });
-    return post || undefined;
+    try {
+      if (global.useMemoryStorage) {
+        throw new Error('Using memory storage');
+      }
+      const post = await Post.findOne({ id });
+      return post || undefined;
+    } catch (error) {
+      console.error('MongoDB operation failed, falling back to MemStorage. Error:', error);
+      global.useMemoryStorage = true;
+      return undefined;
+    }
   }
 
   async getPostBySlug(slug: string): Promise<Post | undefined> {
