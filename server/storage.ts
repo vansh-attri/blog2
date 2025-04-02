@@ -67,10 +67,10 @@ export class MemStorage implements IStorage {
       checkPeriod: 86400000, // prune expired entries every 24h
     });
     
-    // Create admin user with scrypt hashed password
+    // Create admin user with default credentials
     this.createUser({
       username: "admin",
-      password: "94af45722a37562535affb2295b9d610d9af3e25feaf26e1be0b5f0d4d457f7be9754a821203079e671af54c28d725ef35db832006a5c5e4fa57f75c9a4a6339.f05818759be29e9e134bc5c7ce932637", // "admin123"
+      password: "admin123", // Default password
       displayName: "Admin",
       isAdmin: true,
     });
