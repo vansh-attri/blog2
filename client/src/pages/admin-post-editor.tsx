@@ -268,7 +268,10 @@ export default function AdminPostEditor() {
                       </FormControl>
                       <SelectContent>
                         {CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category || 'unknown'}>
+                          <SelectItem 
+                            key={category} 
+                            value={category || 'unknown'} // Fallback value in case category is empty
+                          >
                             {category}
                           </SelectItem>
                         ))}

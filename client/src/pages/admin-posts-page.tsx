@@ -74,7 +74,7 @@ export default function AdminPostsPage() {
 
   // Fetch posts with pagination and filters
   const { data, isLoading, error } = useQuery<PostsResponse>({
-    queryKey: [`/api/admin/posts?page=${currentPage}${statusFilter ? `&status=${statusFilter}` : ''}`],
+    queryKey: [`/api/admin/posts?page=${currentPage}${statusFilter && statusFilter !== 'all' ? `&status=${statusFilter}` : ''}`],
   });
 
   // Delete post mutation
@@ -167,7 +167,7 @@ export default function AdminPostsPage() {
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Posts</SelectItem>
+                <SelectItem value="all">All Posts</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="draft">Drafts</SelectItem>
               </SelectContent>
