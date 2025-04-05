@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./models/BaseModel";
 import { setupAuth } from "./auth";
-import { connection } from "./mongo";
+import { connection } from "./config/mongo";
 import { insertPostSchema, updatePostSchema, searchSchema, insertSubscriberSchema } from "@shared/schema";
 import { z } from "zod";
 import { Router } from 'express';
