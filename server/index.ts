@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { connectToMongoDB } from "./mongo";
+import { connectToMongoDB } from "./config/mongo";
 import dotenv from "dotenv";
 
 // Declare global namespace extension for TypeScript
