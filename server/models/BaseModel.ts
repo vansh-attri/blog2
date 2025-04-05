@@ -489,7 +489,7 @@ export class MemStorage implements IStorage {
 import { DatabaseStorage } from "./storage.database";
 
 // Import MongoDB and memory storage
-import { MongoStorage } from "./storage.mongo";
+import { MongoStorage } from "./MongoModel";
 import { connectToMongoDB } from "./mongo";
 
 // Function to create appropriate storage based on environment

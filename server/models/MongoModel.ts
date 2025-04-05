@@ -1,19 +1,18 @@
-
-import { IStorage } from "./storage";
-import { Post, InsertPost, UpdatePost, User, InsertUser, UpdateUser, Subscriber, InsertSubscriber } from "@shared/schema";
-import session from "express-session";
-import MongoStore from "connect-mongo";
-import { connection } from "./mongo";
-import { UserModel, PostModel, SubscriberModel } from "./mongodb";
+import mongoose from 'mongoose';
+import { IStorage } from './BaseModel';
+import { Post, InsertPost, UpdatePost, User, InsertUser, UpdateUser, Subscriber, InsertSubscriber } from '@shared/schema';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+import {UserModel, PostModel, SubscriberModel} from './mongodb';
 
 export class MongoStorage implements IStorage {
-  public sessionStore: session.Store;
+  sessionStore: session.Store;
 
   constructor() {
     this.sessionStore = MongoStore.create({
-      client: connection.getClient(),
-      collectionName: "sessions",
-      ttl: 24 * 60 * 60, // 1 day
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 24 * 60 * 60 // 1 day
     });
   }
 
@@ -59,34 +58,26 @@ export class MongoStorage implements IStorage {
 
   async getAllPosts(options: { status?: string; limit?: number; offset?: number } = {}): Promise<Post[]> {
     let query = PostModel.find();
-    
     if (options.status) {
       query = query.where('status').equals(options.status);
     }
-    
     query = query.sort('-publishedAt');
-    
     if (options.limit !== undefined) {
       query = query.skip(options.offset || 0).limit(options.limit);
     }
-    
     const posts = await query.exec();
     return posts.map(post => post.toObject());
   }
 
   async getPostsByCategory(category: string, options: { status?: string; limit?: number; offset?: number } = {}): Promise<Post[]> {
     let query = PostModel.find({ category });
-    
     if (options.status) {
       query = query.where('status').equals(options.status);
     }
-    
     query = query.sort('-publishedAt');
-    
     if (options.limit !== undefined) {
       query = query.skip(options.offset || 0).limit(options.limit);
     }
-    
     const posts = await query.exec();
     return posts.map(post => post.toObject());
   }
@@ -113,7 +104,6 @@ export class MongoStorage implements IStorage {
 
   async searchPosts(query: string, options: { status?: string; limit?: number; offset?: number } = {}): Promise<Post[]> {
     const searchRegex = new RegExp(query, 'i');
-    
     let mongoQuery = PostModel.find({
       $or: [
         { title: searchRegex },
@@ -121,15 +111,12 @@ export class MongoStorage implements IStorage {
         { excerpt: searchRegex }
       ]
     });
-    
     if (options.status) {
       mongoQuery = mongoQuery.where('status').equals(options.status);
     }
-    
     if (options.limit !== undefined) {
       mongoQuery = mongoQuery.skip(options.offset || 0).limit(options.limit);
     }
-    
     const posts = await mongoQuery.exec();
     return posts.map(post => post.toObject());
   }
