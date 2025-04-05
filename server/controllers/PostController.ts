@@ -23,7 +23,17 @@ export class PostController {
         }
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch posts" });
+      console.error('Error fetching posts:', error);
+      res.status(500).json({ 
+        posts: [],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0
+        },
+        error: "Failed to fetch posts" 
+      });
     }
   }
 
