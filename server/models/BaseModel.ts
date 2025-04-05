@@ -486,7 +486,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-import { DatabaseStorage } from "./storage.database";
+import { DatabaseStorage } from "./storage.database.ts";
 
 // Import MongoDB and memory storage
 import { MongoStorage } from "./MongoModel";
