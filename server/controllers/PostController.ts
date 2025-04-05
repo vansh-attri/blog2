@@ -29,9 +29,13 @@ export class PostController {
 
   static async createPost(req: Request, res: Response) {
     try {
-      const post = await storage.createPost(req.body);
+      const post = await storage.createPost({
+        ...req.body,
+        authorId: req.user?.id
+      });
       res.json(post);
     } catch (error) {
+      console.error('Error creating post:', error);
       res.status(500).json({ error: "Failed to create post" });
     }
   }
